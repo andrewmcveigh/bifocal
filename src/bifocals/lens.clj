@@ -97,8 +97,3 @@
        (let [c (->> ct-m (c/map (fn [[k ct-f]] [k (ct-f s)])) (into {}))]
          {:category c :value (f s)}))
       ([s f]))))
-
-(view (comp map
-            (categorize {:k :type} {:k :type})
-            (+> (key :x) (key :y)))
-      [{:type "x" :x 1 :y 2} {:type "y" :x 3 :y 4}])

@@ -37,4 +37,11 @@
 
   )
 
+(deftest categorize-test
+  (is (= (l/view (comp l/map
+                       (l/categorize {:k :type} {:k :type})
+                       (l/+> (l/key :x) (l/key :y)))
+                 [{:type "x" :x 1 :y 2} {:type "y" :x 3 :y 4}])
+         '({:category {:k "x"}, :value [1 2]} {:category {:k "y"}, :value [3 4]}))))
+
 ;; (clojure.test/run-tests)

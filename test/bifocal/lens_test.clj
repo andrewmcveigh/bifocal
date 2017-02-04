@@ -44,4 +44,9 @@
                  [{:type "x" :x 1 :y 2} {:type "y" :x 3 :y 4}])
          '({:category {:k "x"}, :value [1 2]} {:category {:k "y"}, :value [3 4]}))))
 
+(deftest prism-test
+  (is (= 1 (l/view (l/prism [:x (l/key :x)] [:y (l/key :y)]) {:x 1})))
+  (is (= 2 (l/view (l/prism [:x (l/key :x)] [:y (l/key :y)]) {:y 2}))))
+
+
 ;; (clojure.test/run-tests)

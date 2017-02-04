@@ -97,3 +97,10 @@
        (let [c (->> ct-m (c/map (fn [[k ct-f]] [k (ct-f s)])) (into {}))]
          {:category c :value (f s)}))
       ([s f]))))
+
+(defn prism [[a? a] [b? b]]
+  (lens
+   (fn [s]
+     (cond (a? s) (view a s) (b? s) (view b s)))
+   (fn [s f]
+     (cond (a? s) (over a f s) (b? s) (over b f s)))))

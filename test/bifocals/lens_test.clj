@@ -9,7 +9,7 @@
 (deftest id-test
   (is (= {:x 4} (l/view (comp l/id l/id) {:x 4})))
   (is (= 4 (l/over l/id inc 3)))
-  (is (= (l/set l/id 4 3)))
+  (is (= 3 (l/set l/id 4 3)))
   )
 
 (deftest kv-test

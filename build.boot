@@ -12,6 +12,16 @@
           :resource-paths #{"src"}
           :exclusions     '[org.clojure/clojure org.clojure/test.check])
 
+(let [ci-user (System/getenv "TRAVIS_USER")
+      ci-pass (System/getenv "TRAVIS_PASS")]
+  (when (and ci-user ci-pass)
+    (set-env! :repositories
+              (-> (into {} (get-env :repositories))
+                  (update "clojars" assoc
+                          :username ci-user
+                          :password ci-pass)
+                  (into [])))))
+
 (task-options!
  pom {:project +project+
       :version +version+

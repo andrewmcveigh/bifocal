@@ -1,0 +1,10 @@
+language: java
+install: make deps
+script: make clean test
+deploy:
+  provider: script
+  on:
+    branch: master
+  script: make deploy
+jdk:
+  - oraclejdk8

@@ -4,6 +4,8 @@
    [bifocals.functor :refer [-fmap fmap]]
    [clojure.set :as set]))
 
+;; forall g . Functor g => (a -> g a) -> g b
+
 (alias 'c 'clojure.core)
 ;; data Lens s a = Lens (s -> (a -> s, a))
 

@@ -104,3 +104,13 @@
      (cond (a? s) (view a s) (b? s) (view b s)))
    (fn [s f]
      (cond (a? s) (over a f s) (b? s) (over b f s)))))
+
+(defn ? [pred a]
+  (lens
+   (fn [s]
+     (when (pred s) (view a s)))
+   (fn [s f]
+     (when (pred s) (over a f s)))))
+
+(defn maybe [lens]
+  (? (complement nil?) lens))

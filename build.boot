@@ -1,4 +1,4 @@
-(def +project+ 'bifocals)
+(def +project+ 'bifocal)
 (def +version+ "0.1.0-SNAPSHOT")
 
 (def dependencies

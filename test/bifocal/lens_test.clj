@@ -1,6 +1,6 @@
-(ns bifocals.lens-test
+(ns bifocal.lens-test
   (:require
-   [bifocals.lens :as l]
+   [bifocal.lens :as l]
    [clojure.test :refer [deftest is]]
    [clojure.java.io :as io]
    [clojure.edn :as edn]))

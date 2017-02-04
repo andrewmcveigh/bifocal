@@ -1,4 +1,4 @@
-(ns bifocals.functor)
+(ns bifocal.functor)
 
 (defprotocol Functor
   (-fmap [Fa f]))

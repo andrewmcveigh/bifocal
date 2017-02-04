@@ -1,7 +1,7 @@
-(ns bifocals.lens
+(ns bifocal.lens
   (:refer-clojure :exclude [key map set])
   (:require
-   [bifocals.functor :refer [-fmap fmap]]
+   [bifocal.functor :refer [-fmap fmap]]
    [clojure.set :as set]))
 
 ;; forall g . Functor g => (a -> g a) -> g b
@@ -19,7 +19,7 @@
       ([s g] (set s #(f % g))))))
 
 (deftype Value [m v]
-  bifocals.functor.Functor
+  bifocal.functor.Functor
   (-fmap [Fa f] (Value. m (f v))))
 
 (defn value [v] (Value. {} v))

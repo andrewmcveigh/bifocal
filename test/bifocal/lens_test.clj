@@ -72,4 +72,9 @@
   (= [1 2 4] (l/view (l/filter int?) [1 2 :3 4]))
   (= [2 3 5] (l/over (l/filter int?) inc [1 2 :3 4])))
 
+(deftest flatten-test
+  (is (= [1 2 3] (l/view l/flatten [1 2 3])))
+  (is (= [1 2 3] (l/view l/flatten [[1 2 3]])))
+  (is (= [1 2 3] (l/view l/flatten [[1] [2 3]]))))
+
 ;; (clojure.test/run-tests)

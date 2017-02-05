@@ -1,22 +1,10 @@
 (ns bifocal.lens
-  (:refer-clojure :exclude [cond filter key map meta nth set])
+  (:refer-clojure :exclude [cond filter flatten key map meta nth set])
   (:require
    [bifocal.functor :refer [ffilter -fmap fmap]]
    [clojure.set :as set]))
 
-;; forall g . Functor g => (a -> g a) -> g b
-
 (alias 'c 'clojure.core)
-;; data Lens s a = Lens (s -> (a -> s, a))
-
-;; lens :: (s -> a) -> (s -> a -> s) -> Lens' s a
-(defn lens [get set]
-  ;; f :: s -> a
-  ;; g :: s -> a -> s
-  (fn [f]
-    (fn
-      ([s] (f (get s)))
-      ([s g] (set s #(f % g))))))
 
 (deftype Value [m v]
   bifocal.functor.Functor
@@ -50,12 +38,22 @@
   ([m v] (Value. m v))
   ([v] (value {} v)))
 
+;; forall g . Functor g => (a -> g a) -> g b
+;; data Lens s a = Lens (s -> (a -> s, a))
+;; lens :: (s -> a) -> (s -> a -> s) -> Lens' s a
+(defn lens [get set]
+  ;; f :: s -> a
+  ;; g :: s -> a -> s
+  (fn [f]
+    (fn
+      ([s] (f (get s)))
+      ([s g] (set s #(f % g))))))
+
 (def v (lens #(.-v %) -fmap))
 
 (defn const [s _] s)
 
 (defn id-setter [s g] (g s))
-
 
 (def id (lens identity id-setter))
 
@@ -137,9 +135,9 @@
 (defn meta [f]
   (lens
    (fn [s]
-     ;; if (instance? clojure.lang.IObj s)
-     ;; (vary-meta s merge (f s))
-     (value (f s) s))
+     (if (instance? Value s)
+       (vary-meta s merge (f s))
+       (value (f s) s)))
    id-setter))
 
 (defn cond [[pred lens-a] & pred-lenses]
@@ -173,6 +171,21 @@
   (->> lenses
        (map-indexed (fn [i lens] (comp (nth i) lens)))
        (apply combinator)))
+
+(defn flat-map [f coll]
+  (let [mapped (map f coll)]
+    (if (every? sequential? mapped)
+      (apply concat mapped)
+      mapped)))
+
+(defn traverse [get set]
+  (fn [f]
+    (fn
+      ([s] (flat-map f (get s)))
+      ([s g] (flat-map (fn [x] (set x #(f % g))) s)))))
+
+(def flatten
+  (traverse sequence id-setter))
 
 ;; duplication lens? tagging?
 ;; Costate Comonad Coalgebras

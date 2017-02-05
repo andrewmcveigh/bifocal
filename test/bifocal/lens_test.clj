@@ -68,4 +68,8 @@
                  [{:type 1 :val 4} 1])
          (l/value {:c 2} 4))))
 
+(deftest filter-test
+  (= [1 2 4] (l/view (l/filter int?) [1 2 :3 4]))
+  (= [2 3 5] (l/over (l/filter int?) inc [1 2 :3 4])))
+
 ;; (clojure.test/run-tests)

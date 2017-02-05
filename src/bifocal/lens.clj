@@ -1,7 +1,7 @@
 (ns bifocal.lens
-  (:refer-clojure :exclude [cond key map meta nth set])
+  (:refer-clojure :exclude [cond filter key map meta nth set])
   (:require
-   [bifocal.functor :refer [-fmap fmap]]
+   [bifocal.functor :refer [ffilter -fmap fmap]]
    [clojure.set :as set]))
 
 ;; forall g . Functor g => (a -> g a) -> g b
@@ -72,6 +72,14 @@
       ([s g] (fmap (fn [x] (set x #(f % g))) s)))))
 
 (def map (traversal sequence id-setter))
+
+(defn filter [pred]
+  (fn [f]
+    (fn
+      ([s] (fmap f (ffilter pred s)))
+      ([s g] (->> s
+                  (ffilter pred)
+                  (fmap (fn [x] (f x g))))))))
 
 ;;    view :: Lens' a b -> a -> b
 (defn view [lens a]

@@ -48,5 +48,12 @@
   (is (= 1 (l/view (l/prism [:x (l/key :x)] [:y (l/key :y)]) {:x 1})))
   (is (= 2 (l/view (l/prism [:x (l/key :x)] [:y (l/key :y)]) {:y 2}))))
 
+(deftest nth-test
+  (is (= 1 (l/view (l/nth 0) [1 2 3])))
+  (is (= 2 (l/view (l/nth 1) [1 2 3])))
+  (is (= 3 (l/view (l/nth 2) [1 2 3])))
+  (is (= [2 2 3] (l/over (l/nth 0) inc [1 2 3])))
+  (is (= [1 3 3] (l/over (l/nth 1) inc [1 2 3])))
+  (is (= [1 2 4] (l/over (l/nth 2) inc [1 2 3]))))
 
 ;; (clojure.test/run-tests)

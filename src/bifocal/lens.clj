@@ -1,5 +1,5 @@
 (ns bifocal.lens
-  (:refer-clojure :exclude [key map set])
+  (:refer-clojure :exclude [key map nth set])
   (:require
    [bifocal.functor :refer [-fmap fmap]]
    [clojure.set :as set]))
@@ -80,7 +80,7 @@
              (fn [s f]
                (->> s
                     (over init f)
-                    (over x (c/comp #(nth % i) f))))))
+                    (over x (c/comp #(c/nth % i) f))))))
           (lens (constantly []) const)
           (map-indexed vector lenses)))
 
@@ -114,3 +114,20 @@
 
 (defn maybe [lens]
   (? (complement nil?) lens))
+
+(defn nth [index]
+  (lens (fn [s] (c/nth s index))
+        (fn [s f]
+          (let [v? (vector? s)
+                coll (if v? s (vec s))
+                coll-into (empty s)
+                updated (update coll index f)]
+            (if v? updated (into coll-into updated))))))
+
+(defn tuple [combinator & lenses]
+  (->> lenses
+       (map-indexed (fn [i lens] (comp (nth i) lens)))
+       (apply combinator)))
+
+;; duplication lens? tagging?
+;; Costate Comonad Coalgebras

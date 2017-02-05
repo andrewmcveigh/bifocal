@@ -44,9 +44,9 @@
                  [{:type "x" :x 1 :y 2} {:type "y" :x 3 :y 4}])
          '({:category {:k "x"}, :value [1 2]} {:category {:k "y"}, :value [3 4]}))))
 
-(deftest prism-test
-  (is (= 1 (l/view (l/prism [:x (l/key :x)] [:y (l/key :y)]) {:x 1})))
-  (is (= 2 (l/view (l/prism [:x (l/key :x)] [:y (l/key :y)]) {:y 2}))))
+(deftest cond-test
+  (is (= 1 (l/view (l/cond [:x (l/key :x)] [:y (l/key :y)]) {:x 1})))
+  (is (= 2 (l/view (l/cond [:x (l/key :x)] [:y (l/key :y)]) {:y 2}))))
 
 (deftest nth-test
   (is (= 1 (l/view (l/nth 0) [1 2 3])))
@@ -55,5 +55,17 @@
   (is (= [2 2 3] (l/over (l/nth 0) inc [1 2 3])))
   (is (= [1 3 3] (l/over (l/nth 1) inc [1 2 3])))
   (is (= [1 2 4] (l/over (l/nth 2) inc [1 2 3]))))
+
+(deftest meta-test
+  (is (= (l/view (comp (l/nth 0)
+                       (l/meta (fn [s] {:type (:type s)}))
+                       (l/key :val))
+                 [{:type 1 :val 4}])
+         (l/value {:type 1} 4)))
+  (is (= (l/view (comp (l/nth 0)
+                       (l/meta (fn [s] {:c (count s)}))
+                       (l/key :val))
+                 [{:type 1 :val 4} 1])
+         (l/value {:c 2} 4))))
 
 ;; (clojure.test/run-tests)

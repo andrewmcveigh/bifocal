@@ -1,5 +1,5 @@
 (ns bifocal.lens
-  (:refer-clojure :exclude [key map nth set])
+  (:refer-clojure :exclude [cond key map meta nth set])
   (:require
    [bifocal.functor :refer [-fmap fmap]]
    [clojure.set :as set]))
@@ -20,9 +20,35 @@
 
 (deftype Value [m v]
   bifocal.functor.Functor
-  (-fmap [Fa f] (Value. m (f v))))
+  (-fmap [Fa f] (Value. m (f v)))
+  clojure.lang.IMeta
+  (meta [_] m)
+  clojure.lang.IObj
+  (withMeta [_ m] (Value. m v))
+  clojure.lang.IPersistentCollection
+  (cons [_ o] (Value. m (.cons v o)))
+  (empty [_] (Value. m (.empty v)))
+  (equiv [_ other ]
+    (if (instance? Value other)
+      (and (= m (.-m other))
+           (= v (.-v other)))
+      false))
+  clojure.lang.ISeq
+  (first [_] (Value. m (.first v)))
+  (next [_] (Value. m (.next v)))
+  (more [_] (Value. m (.more v)))
+  clojure.lang.ILookup
+  (valAt [_ k] (Value. m (.valAt v k)))
+  (valAt [_ k not-found] (Value. m (.valAt v k not-found))))
 
-(defn value [v] (Value. {} v))
+(defmethod print-method Value [x w]
+  (.write w (format "#<Value %s %s>"
+                    (pr-str (.-v x))
+                    (apply pr-str (apply concat (.-m x))))))
+
+(defn value
+  ([m v] (Value. m v))
+  ([v] (value {} v)))
 
 (def v (lens #(.-v %) -fmap))
 
@@ -98,12 +124,21 @@
          {:category c :value (f s)}))
       ([s f]))))
 
-(defn prism [[a? a] [b? b]]
+(defn meta [f]
   (lens
    (fn [s]
-     (cond (a? s) (view a s) (b? s) (view b s)))
-   (fn [s f]
-     (cond (a? s) (over a f s) (b? s) (over b f s)))))
+     ;; if (instance? clojure.lang.IObj s)
+     ;; (vary-meta s merge (f s))
+     (value (f s) s))
+   id-setter))
+
+(defn cond [[pred lens-a] & pred-lenses]
+  (let [pred-lenses (conj pred-lenses [pred lens-a])]
+    (lens
+     (fn [s]
+       (some (fn [[p l]] (when (p s) (view l s))) pred-lenses))
+     (fn [s f]
+       (some (fn [[p l]] (when (p s) (over l f s))) pred-lenses)))))
 
 (defn ? [pred a]
   (lens

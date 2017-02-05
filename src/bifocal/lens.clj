@@ -73,6 +73,8 @@
 
 (def map (traversal sequence id-setter))
 
+(def filter-map (traversal (partial remove nil?) id-setter))
+
 (defn filter [pred]
   (fn [f]
     (fn

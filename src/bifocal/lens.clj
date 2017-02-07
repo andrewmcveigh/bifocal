@@ -173,7 +173,7 @@
        (apply combinator)))
 
 (defn flat-map [f coll]
-  (let [mapped (map f coll)]
+  (let [mapped (c/map f coll)]
     (if (every? sequential? mapped)
       (apply concat mapped)
       mapped)))

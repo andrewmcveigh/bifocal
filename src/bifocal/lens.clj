@@ -2,17 +2,12 @@
   (:refer-clojure :exclude [cond filter flatten key map meta nth set])
   (:require
    [bifocal.functor :refer [ffilter -fmap fmap]]
-   [clojure.set :as set]))
+   [clojure.set :as set]
+   [clojure.spec :as s]))
 
 (alias 'c 'clojure.core)
 
 (deftype Value [m v]
-  bifocal.functor.Functor
-  (-fmap [Fa f] (Value. m (f v)))
-  clojure.lang.IMeta
-  (meta [_] m)
-  clojure.lang.IObj
-  (withMeta [_ m] (Value. m v))
   clojure.lang.IPersistentCollection
   (cons [_ o] (Value. m (.cons v o)))
   (empty [_] (Value. m (.empty v)))
@@ -38,8 +33,18 @@
   ([m v] (Value. m v))
   ([v] (value {} v)))
 
-;; forall g . Functor g => (a -> g a) -> g b
-;; data Lens s a = Lens (s -> (a -> s, a))
+(s/def ::get-f (s/fspec :args (s/cat :s any?) :ret any?))
+(s/def ::upd-f (s/fspec :args (s/cat :s any? :f fn?) :ret any?))
+(s/def ::g     (s/fspec :args (s/cat :x any?) :ret any?))
+(s/def ::inner (s/or :arity-1 (s/fspec :args (s/cat :s any?))
+                     :arity-2 (s/fspec :args (s/cat :s any? :g ::g))))
+(s/def ::lens  (s/fspec :args (s/cat :f ::inner) :ret ::inner))
+(s/fdef lens
+  :args (s/cat :get-f ::get-f :upd-f ::upd-f)
+  :ret  ::lens)
+
+;;; forall g . Functor g => (a -> g a) -> g b
+;;: data Lens s a = Lens (s -> (a -> s, a))
 ;; lens :: (s -> a) -> (s -> a -> s) -> Lens' s a
 (defn lens [get set]
   ;; f :: s -> a
